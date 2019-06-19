@@ -119,7 +119,8 @@ def prepare_string(string, length=DEFAULT_MIN_LENGTH):
         length = DEFAULT_MIN_LENGTH
 
     if string:
-        result = bytearray(encode(string)[:length])
+        string = encode(string)
+        result = bytearray(string[:length])
         result.extend(NULL * (length - len(string)))
     else:
         result = NULL * length

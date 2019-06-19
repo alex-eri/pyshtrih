@@ -83,6 +83,8 @@ def discovery(callback=None, port=None, baudrate=None):
                     device_cls = device.Shtrih950K
                 elif u'ON-LINE' in d.name:
                     device_cls = device.ShtrihOnLine
+                elif u'РР-04Ф' in d.name:
+                    device_cls = device.ShtrihOnLine
                 elif u'РИТЕЙЛ-01Ф' in d.name:
                     device_cls = device.Retail01F
                 elif u'М-01Ф' in d.name:
@@ -95,6 +97,8 @@ def discovery(callback=None, port=None, baudrate=None):
                     device_cls = device.ShtrihLight02F
                 elif u'МИНИ-01Ф' in d.name:
                     device_cls = device.ShtrihMini01F
+                else:
+                    print(u'Устройство не поддерживается', d.name)
 
                 if device_cls:
                     discovered_device = device_cls(p, b)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
+from __future__ import print_function #compatible print function for Python 2 and 3
 from .utils import discovery
 from .protocol import Protocol
 from .device import ShtrihFRK, ShtrihFRPTK, ShtrihComboFRK, ShtrihComboPTK, ShtrihLightPTK, Shtrih950K, \

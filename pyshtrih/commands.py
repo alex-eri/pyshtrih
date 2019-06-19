@@ -157,7 +157,10 @@ def write_table(self, table, row, field, value, _type):
 
     cast_funcs_map = {
         int: misc.FuncChain(bytearray, misc.int_to_bytes),
-        str: misc.encode
+        str: misc.prepare_string
+        #str: misc.encode
+        #str был изменен обработчик на prepare_string, т.к. при записи остаток байтов заполнялся другими данными
+        #https://github.com/oleg-golovanov/pyshtrih/pull/11/commits/516ab7b417b447881bcd51d30345cf0ceafccb49
     }
 
     return self.protocol.command(
@@ -181,7 +184,9 @@ def read_table(self, table, row, field, _type):
 
     if _type not in (cast_funcs_map.keys()):
         raise ValueError(
-            u'ожидаемые типы {}'.format(', '.join(cast_funcs_map.keys()))
+            #u'ожидаемые типы {}'.format(', '.join(cast_funcs_map.keys()))
+            #edited with https://github.com/oleg-golovanov/pyshtrih/pull/3/commits/3ec33cc5325622babde3cf1894a458b7ce635263
+            u'ожидаемые типы {}'.format(', '.join([str(item) for item in cast_funcs_map.keys()]))
         )
 
     result = self.protocol.command(
@@ -249,6 +254,18 @@ confirm_date.related = (set_datetime, )
 set_datetime.required = (set_time, set_date, confirm_date)
 
 
+def init_table(self):
+    """
+    Инициализация таблиц начальными значениями
+    """
+
+    return self.protocol.command(
+        0x24,
+        self.admin_password
+    )
+init_table.cmd = 0x24
+
+
 def cut(self, partial=False):
     """
     Обрезка чека.
@@ -261,6 +278,18 @@ def cut(self, partial=False):
         misc.CAST_SIZE['1'](partial)
     )
 cut.cmd = 0x25
+
+
+def reset_summary(self):
+    """
+    Общее гашение
+    """
+
+    return self.protocol.command(
+        0x27,
+        self.admin_password
+    )
+reset_summary.cmd = 0x27
 
 
 def open_drawer(self, box=0):
