@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function #compatible print function for Python 2 and 3
@@ -9,8 +10,8 @@ def discovery_callback(port, baudrate):
 
 
 if __name__ == '__main__':
-    #devices = pyshtrih.discovery(discovery_callback)
-    devices = pyshtrih.discovery(discovery_callback, "/dev/ttyUSB0", 115200)
+    devices = pyshtrih.discovery(discovery_callback)
+    #devices = pyshtrih.discovery(discovery_callback, "/dev/ttyUSB0", 115200)
     #devices = pyshtrih.discovery(discovery_callback, "socket://192.168.137.111:7778", 115200)
 
     if not devices:
@@ -21,11 +22,15 @@ if __name__ == '__main__':
     device.connect()
 
     try:
+        #device.cancel_check()
+        #device.open_shift()
+        #device.open_check(0) #0 - продажа, 1 - покупка, 2 - возврат продажи, 3 - возврат покупки
         #print(device.model())
         #print(device.state())
         #print(device.full_state())
-
-        #device.beep()
+        #print(device.fs_state())
+        #print(device.fs_info_exchange())
+        device.beep()
         '''
         device.print_string("Пример печати нефискальной строки текста")
         device.print_line() #Печать строки разделителя
@@ -44,6 +49,24 @@ if __name__ == '__main__':
         #device.cancel_check() #Отменить чек
         #device.send_tlv_struct() #Передать произвольную TLV структуру
 
+        #Тест установки TLV
+        """
+        #device.cancel_check()
+        phone = pyshtrih.FD({1008: u'+79313587439'})
+        email = pyshtrih.FD({1008: u'm0x3@mail.ru'})
+        cashier = pyshtrih.FD({1021: u'Кассир: Пупкин В.И.'})
+        #tlv.set_value(1008, u'+79313587439')
+        #tlv.set_value(1021, u'Кассир: Пупкин В.И.')
+        device.open_check(0)
+        device.send_tlv_struct(cashier.dump())
+        device.send_tlv_struct(phone.dump())
+        #device.send_tlv_struct(email.dump())
+        device.sale(
+            (u'За рубль', 1000, 100), tax1=1
+        )
+        device.close_check(100)
+        device.feed(3, control_tape=True, cash_tape=True)
+        """
 
         """
         device.open_check(0)

@@ -9,8 +9,11 @@ from .compat import unicode, bool_compat
 class FD(object):
     TAGS = {
         # тэг: (тип значения, признак обязательности соблюдения длины, максимальная длина)
+        # перечень тегов https://www.garant.ru/products/ipo/prime/doc/71540610/
         # телефон или электронный адрес покупателя
-        1008: (unicode, False, 64)
+        1008: (unicode, False, 64),
+        # имя кассира для передачи в офд и печати на чеке
+        1021: (unicode, False, 64)
     }
 
     CAST = {
@@ -23,7 +26,7 @@ class FD(object):
     def __init__(self, tags=None):
         """
         Структура для работы с фискальными данными.
-        
+
         :type tags: dict
         :param tags: словарь {тэг: значение}
         """
@@ -38,7 +41,7 @@ class FD(object):
     def set_value(self, tag, value):
         """
         Установить значение для тэга.
-        
+
         :type tag: int
         :param tag: тэг
         :param value: значение тэга
@@ -81,8 +84,8 @@ class FD(object):
 
     def dump(self):
         """
-        Получить TVL структуру, готовую для передачи в команду send_tlv_struct.
-        
+        Получить TLV структуру, готовую для передачи в команду send_tlv_struct.
+
         :rtype: bytes
         :return: tlv строка
         """
