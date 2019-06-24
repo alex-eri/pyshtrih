@@ -289,7 +289,7 @@ class GP(BaseHTTPRequestHandler):
 
         elif d[0]=='c': #c; Выводит на чековую ленту дубликат последнего распечатанного чека.
           try:
-            # TODO добавить поддержку печати копии чека
+            device.repeat()
             result += d[0]+";0;Успешно;;\n"
           except Exception as e:
             result += d[0]+";18;"+format(e)+";;\n"
@@ -338,7 +338,7 @@ class GP(BaseHTTPRequestHandler):
 
 def run(server_class=HTTPServer, handler_class=GP, port=8888):
   try:
-    server_address = ('127.0.0.1', port) #use 0.0.0.0 to share on all interfaces
+    server_address = ('0.0.0.0', port) #use 0.0.0.0 to share on all interfaces
     httpd = server_class(server_address, handler_class)
     print('Server running at localhost:8888...', "\nPress Ctrl+C to shut down")
     httpd.serve_forever()
