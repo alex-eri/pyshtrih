@@ -4,7 +4,7 @@ from __future__ import print_function #compatible print function for Python 2 an
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import pyshtrih
 
-debug = False
+debug = True
 
 def discovery_callback(port, baudrate):
   if debug:
@@ -202,7 +202,12 @@ class GP(BaseHTTPRequestHandler):
 
             #device.sale(item, department_num=0, tax1=0, tax2=0, tax3=0, tax4=0)
             #text, quantity, price = item
-            device.sale( (text, quantity, price), department_num=department, tax1=nalog )
+            if check_type == 0:
+              device.sale( (text, quantity, price), department_num=department, tax1=nalog )
+            elif check_type == 2:
+              device.return_sale( (text, quantity, price), department_num=department, tax1=nalog )
+            else:
+              raise Exception(u'Операция не поддерживается')
 
             result += d[0]+";0;Успешно;;\n"
           except Exception as e:
