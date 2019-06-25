@@ -411,6 +411,19 @@ def z_report(self):
 z_report.cmd = 0x41
 
 
+def sections_report(self):
+    """
+    Отчёт по секциям.
+    """
+
+    self.wait_printing()
+    return self.protocol.command(
+        0x42,
+        self.admin_password
+    )
+sections_report.cmd = 0x42
+
+
 def income(self, cash):
     """
     Внесение.
@@ -880,6 +893,7 @@ feed.depends = (wait_printing, )
 test_stop.depends = (wait_printing, )
 x_report.depends = (wait_printing, )
 z_report.depends = (wait_printing, )
+sections_report.depends = (wait_printing, )
 income.depends = (wait_printing, )
 outcome.depends = (wait_printing, )
 cancel_check.depends = (wait_printing, )

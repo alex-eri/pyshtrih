@@ -320,6 +320,13 @@ class GP(BaseHTTPRequestHandler):
           except Exception as e:
             result += d[0]+";20;"+format(e)+";;\n"
 
+        elif d[0]=='rep_sections': #rep_sections; Отчет по секциям
+          try:
+            device.sections_report()
+            result += d[0]+";0;Успешно;;\n"
+          except Exception as e:
+            result += d[0]+";21;"+format(e)+";;\n"
+
         else:
           result += d[0]+";0;Команда не поддерживается;;\n"
 
