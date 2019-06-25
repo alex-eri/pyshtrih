@@ -130,18 +130,16 @@ class GP(BaseHTTPRequestHandler):
           except Exception as e:
             result += d[0]+";3;"+format(e)+";;\n"
 
-        elif d[0]=='print_font': #pm;НОМЕР_ШРИФТА;ТЕКСТ; выводит текст заданым шрифтом
+        elif d[0]=='print_font': #print_font;НОМЕР_ШРИФТА;ТЕКСТ; выводит текст заданым шрифтом
           try:
-            # TODO сделать выбор шрифта для печати
-            device.print_string(d[2])
+            device.print_font(d[2], int(d[1]))
             result += d[0]+";0;Успешно;;\n"
           except Exception as e:
             result += d[0]+";4;"+format(e)+";;\n"
 
         elif d[0]=='print_bold': #print_bold;ТЕКСТ; выводит текст жирным
           try:
-            # TODO сделать печать жирным
-            device.print_string(d[1])
+            device.print_font(d[1], 2)
             result += d[0]+";0;Успешно;;\n"
           except Exception as e:
             result += d[0]+";5;"+format(e)+";;\n"

@@ -101,6 +101,25 @@ def print_string(self, string, control_tape=True, cash_tape=True):
 print_string.cmd = 0x17
 
 
+def print_font(self, string, font_num=1, control_tape=True, cash_tape=True):
+    """
+    Печать строки заданным шрифтом.
+    """
+
+    control = 0b01 if control_tape else 0b00
+    cash = 0b10 if cash_tape else 0b00
+
+    self.wait_printing()
+    return self.protocol.command(
+        0x2F,
+        self.password,
+        misc.CAST_SIZE['1'](control + cash),
+        misc.CAST_SIZE['1'](font_num),
+        misc.prepare_string(string, self.DEFAULT_MAX_LENGTH)
+    )
+print_font.cmd = 0x2F
+
+
 def print_line(self, symbol='-', control_tape=True, cash_tape=True):
     """
     Печать строки-разделителя.
@@ -854,6 +873,7 @@ def wait_printing(self):
         if submode.state == 3:
             self.continue_print()
 print_string.depends = (wait_printing, )
+print_font.depends = (wait_printing, )
 test_start.depends = (wait_printing, )
 cut.depends = (wait_printing, )
 feed.depends = (wait_printing, )
