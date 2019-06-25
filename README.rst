@@ -148,7 +148,7 @@ PyShtrih
 
 Лицензия
 --------
-MIT лицензия. Подробнее в файле `LICENSE <https://github.com/oleg-golovanov/pyshtrih/blob/master/LICENSE>`_.
+MIT лицензия. Подробнее в файле `LICENSE <https://github.com/m0x3/pyshtrih/blob/master/LICENSE>`_.
 
 .. |Version| image:: https://img.shields.io/pypi/v/pyshtrih.svg
     :target: https://pypi.python.org/pypi/pyshtrih

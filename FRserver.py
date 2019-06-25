@@ -4,7 +4,18 @@ from __future__ import print_function #compatible print function for Python 2 an
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import pyshtrih
 
-debug = True
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser  # ver. < 3.0
+finally:
+  C = ConfigParser()
+  C.read('FRserver.config')
+  debug = C.getboolean('CONFIG', 'debug', fallback=True)
+  ServerInterface = C.get('CONFIG', 'ServerInterface', fallback='127.0.0.1')
+  ServerPort = C.getint('CONFIG', 'ServerPort', fallback=8888)
+  FRport = C.get('CONFIG', 'FRport', fallback='AUTO')
+  FRspeed = C.getint('CONFIG', 'FRspeed', fallback=115200)
 
 def discovery_callback(port, baudrate):
   if debug:
@@ -47,20 +58,11 @@ class GP(BaseHTTPRequestHandler):
     result = '' #Наименование_команды;код_ответа;текст_ответа;ответ_ядра XML BASE64URL;
     connected = True
 
-    #kassir = 'Кассир СИСТ.АДМИН'
-    #check_type = 0 #0 продажа, 1 возврат продажи, 2 покупка, 3 возврат покупки
-    #check_type_text = {0:"ПРОДАЖА", 1:"ВОЗВРАТ ПРОДАЖИ", 2:"ПОКУПКА", 3:"ВОЗВРАТ ПОКУПКИ"}
-    #check_text = ''
-    #check_sum = 0.0
-    #check_width = 48 #32 #48
-
-    #oplaty = {0:"Наличными", 1:"Электронно"}
-
     try:
-      #INIT HERE
-      #devices = pyshtrih.discovery(discovery_callback)
-      devices = pyshtrih.discovery(discovery_callback, "/dev/ttyUSB0", 115200)
-      #devices = pyshtrih.discovery(discovery_callback, "socket://192.168.137.111:7778", 115200)
+      if FRport == 'AUTO':
+        devices = pyshtrih.discovery(discovery_callback)
+      else:
+        devices = pyshtrih.discovery(discovery_callback, FRport, FRspeed)
 
       if not devices:
           raise Exception(u'Устройства не найдены')
@@ -358,11 +360,11 @@ class GP(BaseHTTPRequestHandler):
 
       return result
 
-def run(server_class=HTTPServer, handler_class=GP, port=8888):
+def run(server_class=HTTPServer, handler_class=GP):
   try:
-    server_address = ('0.0.0.0', port) #use 0.0.0.0 to share on all interfaces
+    server_address = (ServerInterface, ServerPort)
     httpd = server_class(server_address, handler_class)
-    print('Server running at localhost:8888...', "\nPress Ctrl+C to shut down")
+    print('Server running at '+ServerInterface+':'+str(ServerPort)+'...', "\nPress Ctrl+C to shut down")
     httpd.serve_forever()
   except KeyboardInterrupt:
     print(' KeyboardInterrupt received, shutting down server')
