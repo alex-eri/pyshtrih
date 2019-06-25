@@ -327,6 +327,13 @@ class GP(BaseHTTPRequestHandler):
           except Exception as e:
             result += d[0]+";21;"+format(e)+";;\n"
 
+        elif d[0]=='m': #m;РЕГИСТР
+          try:
+            device.request_monetary_register(int(d[1]))
+            result += d[0]+";0;Успешно;;\n"
+          except Exception as e:
+            result += d[0]+";22;"+format(e)+";;\n"
+
         else:
           result += d[0]+";0;Команда не поддерживается;;\n"
 
