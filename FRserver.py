@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 from __future__ import print_function #compatible print function for Python 2 and 3
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import pyshtrih
 
@@ -10,7 +11,7 @@ except ImportError:
     from ConfigParser import ConfigParser  # ver. < 3.0
 finally:
   C = ConfigParser()
-  C.read('FRserver.config')
+  C.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'FRserver.config'))
   debug = C.getboolean('CONFIG', 'debug', fallback=True)
   ServerInterface = C.get('CONFIG', 'ServerInterface', fallback='127.0.0.1')
   ServerPort = C.getint('CONFIG', 'ServerPort', fallback=8888)
