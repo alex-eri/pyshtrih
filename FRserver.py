@@ -307,7 +307,7 @@ class GP(BaseHTTPRequestHandler):
             if summa > 0:
               device.income(summa)
             elif summa < 0:
-              device.outcome(summa)
+              device.outcome(abs(summa))
 
             result += d[0]+";0;Успешно;;\n"
           except Exception as e:
