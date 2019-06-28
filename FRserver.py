@@ -167,6 +167,13 @@ class GP(BaseHTTPRequestHandler):
             else: #поставим по-умолчанию продажу
               check_type = 0
 
+            #пробуем отменить предыдущий чек перед открытием следующего
+            #чтобы уменьшить количество проблем у кассиров
+            try:
+              device.cancel_check()
+            except Exception as e:
+              pass
+
             #открываем документ
             device.open_check(check_type)
 
