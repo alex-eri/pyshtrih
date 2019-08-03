@@ -101,6 +101,25 @@ def print_string(self, string, control_tape=True, cash_tape=True):
 print_string.cmd = 0x17
 
 
+def print_font(self, string, font_num=1, control_tape=True, cash_tape=True):
+    """
+    Печать строки заданным шрифтом.
+    """
+
+    control = 0b01 if control_tape else 0b00
+    cash = 0b10 if cash_tape else 0b00
+
+    self.wait_printing()
+    return self.protocol.command(
+        0x2F,
+        self.password,
+        misc.CAST_SIZE['1'](control + cash),
+        misc.CAST_SIZE['1'](font_num),
+        misc.prepare_string(string, self.DEFAULT_MAX_LENGTH)
+    )
+print_font.cmd = 0x2F
+
+
 def print_line(self, symbol='-', control_tape=True, cash_tape=True):
     """
     Печать строки-разделителя.
@@ -157,7 +176,10 @@ def write_table(self, table, row, field, value, _type):
 
     cast_funcs_map = {
         int: misc.FuncChain(bytearray, misc.int_to_bytes),
-        str: misc.encode
+        str: misc.prepare_string
+        #str: misc.encode
+        #str был изменен обработчик на prepare_string, т.к. при записи остаток байтов заполнялся другими данными
+        #https://github.com/oleg-golovanov/pyshtrih/pull/11/commits/516ab7b417b447881bcd51d30345cf0ceafccb49
     }
 
     return self.protocol.command(
@@ -181,7 +203,9 @@ def read_table(self, table, row, field, _type):
 
     if _type not in (cast_funcs_map.keys()):
         raise ValueError(
-            u'ожидаемые типы {}'.format(', '.join(cast_funcs_map.keys()))
+            #u'ожидаемые типы {}'.format(', '.join(cast_funcs_map.keys()))
+            #edited with https://github.com/oleg-golovanov/pyshtrih/pull/3/commits/3ec33cc5325622babde3cf1894a458b7ce635263
+            u'ожидаемые типы {}'.format(', '.join([str(item) for item in cast_funcs_map.keys()]))
         )
 
     result = self.protocol.command(
@@ -249,6 +273,18 @@ confirm_date.related = (set_datetime, )
 set_datetime.required = (set_time, set_date, confirm_date)
 
 
+def init_table(self):
+    """
+    Инициализация таблиц начальными значениями
+    """
+
+    return self.protocol.command(
+        0x24,
+        self.admin_password
+    )
+init_table.cmd = 0x24
+
+
 def cut(self, partial=False):
     """
     Обрезка чека.
@@ -261,6 +297,18 @@ def cut(self, partial=False):
         misc.CAST_SIZE['1'](partial)
     )
 cut.cmd = 0x25
+
+
+def reset_summary(self):
+    """
+    Общее гашение
+    """
+
+    return self.protocol.command(
+        0x27,
+        self.admin_password
+    )
+reset_summary.cmd = 0x27
 
 
 def open_drawer(self, box=0):
@@ -361,6 +409,19 @@ def z_report(self):
         self.admin_password
     )
 z_report.cmd = 0x41
+
+
+def sections_report(self):
+    """
+    Отчёт по секциям.
+    """
+
+    self.wait_printing()
+    return self.protocol.command(
+        0x42,
+        self.admin_password
+    )
+sections_report.cmd = 0x42
 
 
 def income(self, cash):
@@ -825,12 +886,14 @@ def wait_printing(self):
         if submode.state == 3:
             self.continue_print()
 print_string.depends = (wait_printing, )
+print_font.depends = (wait_printing, )
 test_start.depends = (wait_printing, )
 cut.depends = (wait_printing, )
 feed.depends = (wait_printing, )
 test_stop.depends = (wait_printing, )
 x_report.depends = (wait_printing, )
 z_report.depends = (wait_printing, )
+sections_report.depends = (wait_printing, )
 income.depends = (wait_printing, )
 outcome.depends = (wait_printing, )
 cancel_check.depends = (wait_printing, )

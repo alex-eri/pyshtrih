@@ -34,12 +34,14 @@ class Protocol(object):
         """
 
         self.port = port
-        self.serial = serial.Serial(
+        self.serial = serial.serial_for_url(
+            url=port,
             baudrate=baudrate,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
             timeout=timeout,
-            writeTimeout=timeout
+            writeTimeout=timeout,
+            do_not_open=True
         )
         self.fs = fs
         self.connected = False
@@ -50,7 +52,7 @@ class Protocol(object):
         """
 
         if not self.connected:
-            self.serial.port = self.port
+            self.serial.url = self.port
             if not self.serial.isOpen():
                 try:
                     self.serial.open()
