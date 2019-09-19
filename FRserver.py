@@ -195,10 +195,10 @@ class GP(BaseHTTPRequestHandler):
 
             #пробуем отменить предыдущий чек перед открытием следующего
             #чтобы уменьшить количество проблем у кассиров
-            try:
-              device.cancel_check()
-            except Exception as e:
-              pass
+            #try:
+            #  device.cancel_check()
+            #except Exception as e:
+            #  pass
 
             #открываем документ
             device.open_check(check_type)
