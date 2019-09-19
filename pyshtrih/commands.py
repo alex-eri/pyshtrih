@@ -866,7 +866,7 @@ def fs_close_shift(self):
 fs_close_shift.cmd = 0xFF43
 
 
-operation_v2(self, oper_type, item, department_num=0, item_sum=0xffffffffff, tax_rate=0, tax_sum=0xFFFFFFFFFF, method=1, subject=1):
+def operation_v2(self, oper_type, item, department_num=0, item_sum=0xffffffffff, tax_rate=0, tax_sum=0xFFFFFFFFFF, method=1, subject=1):
     """
     oper_type - тип операции
         1 – Приход,
@@ -907,7 +907,7 @@ operation_v2(self, oper_type, item, department_num=0, item_sum=0xffffffffff, tax
     )
 
 operation_v2.cmd = 0xFF46
-    
+
 
 def wait_printing(self):
     """
