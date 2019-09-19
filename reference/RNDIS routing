@@ -1,0 +1,12 @@
+AS ROOT
+
+sysctl -w net.ipv4.ip_forward=1
+
+nano /etc/sysctl.conf
+net.ipv4.ip_forward = 1
+
+iptables -A FORWARD -m conntrack --ctstate NEW -i <Интерфейс с ФР> -s <Сеть ФРа>/24 -j ACCEPT
+iptables -t nat -A POSTROUTING -o <Интерфейс с интернетом> -j MASQUERADE
+
+iptables -A FORWARD -m conntrack --ctstate NEW -i eth5 -s 192.168.137.1/24 -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth2 -j MASQUERADE
