@@ -34,7 +34,7 @@ def discovery(callback=None, port=None, baudrate=None):
     """
     Функция автоопределения подключеннных устройств.
 
-    :param callback: callable объект, принимающий 2 параметра: порт и скорость
+    :param callback: callable объект, принимающий 3 параметра: порт, скорость, имя устройства
     :type port: str
     :param port: порт взаимодействия с устройством
     :type baudrate: int
@@ -57,8 +57,6 @@ def discovery(callback=None, port=None, baudrate=None):
 
     for p in ports:
         for b in baudrates:
-            if callback:
-                callback(p, b)
 
             try:
                 d = Discovery(p, b)
@@ -98,12 +96,15 @@ def discovery(callback=None, port=None, baudrate=None):
                 elif u'МИНИ-01Ф' in d.name:
                     device_cls = device.ShtrihMini01F
                 else:
-                    print(u'Устройство не поддерживается', d.name)
+                    print(u'Устройство не поддерживается', p, b, d.name)
 
                 if device_cls:
                     discovered_device = device_cls(p, b)
                     discovered_device.dev_info = d.dev_info
                     devices.append(discovered_device)
+
+                    if callback:
+                        callback(p, b, d.name)
 
                 break
 

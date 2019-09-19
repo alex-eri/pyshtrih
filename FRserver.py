@@ -18,9 +18,9 @@ finally:
   FRport = C.get('CONFIG', 'FRport', fallback='AUTO')
   FRspeed = C.getint('CONFIG', 'FRspeed', fallback=115200)
 
-def discovery_callback(port, baudrate):
+def discovery_callback(port, baudrate, name):
   if debug:
-    print(port, baudrate)
+    print(port, baudrate, name)
 
 class GP(BaseHTTPRequestHandler):
   def do_HEAD(self):
