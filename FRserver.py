@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: UTF-8 -*-
+
 from __future__ import print_function #compatible print function for Python 2 and 3
 import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import pyshtrih
+import math
 
 try:
     from configparser import ConfigParser
@@ -11,16 +13,18 @@ except ImportError:
     from ConfigParser import ConfigParser  # ver. < 3.0
 finally:
   C = ConfigParser()
-  C.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'FRserver.config'))
+  C.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'FRserver.config'), encoding="utf-8")
   debug = C.getboolean('CONFIG', 'debug', fallback=True)
   ServerInterface = C.get('CONFIG', 'ServerInterface', fallback='127.0.0.1')
   ServerPort = C.getint('CONFIG', 'ServerPort', fallback=8888)
   FRport = C.get('CONFIG', 'FRport', fallback='AUTO')
   FRspeed = C.getint('CONFIG', 'FRspeed', fallback=115200)
+  LineWidth = C.getint('CONFIG', 'LineWidth', fallback=32)
+  LineWidthBold = C.getint('CONFIG', 'LineWidthBold', fallback=32)
 
-def discovery_callback(port, baudrate):
+def discovery_callback(port, baudrate, name):
   if debug:
-    print(port, baudrate)
+    print(port, baudrate, name)
 
 class GP(BaseHTTPRequestHandler):
   def do_HEAD(self):
@@ -59,8 +63,24 @@ class GP(BaseHTTPRequestHandler):
     result = '' #Наименование_команды;код_ответа;текст_ответа;ответ_ядра XML BASE64URL;
     connected = True
 
+    # Форматируем строку
+    def line_format(s, w=32):
+      s=str.replace(s, '#kkm_bold#', '');
+      # Заменяем #kkm_right# на пробелы
+      kkm_right="#kkm_right#" # тэг сдвига вправо
+      space_n=w-(len(s)-len(kkm_right)) # кол-во пробелов
+      s=str.replace(s, kkm_right, " "*space_n) # заменяем тэг сдвига на пробелы
+
+      # Заменяем #kkm_center# на пробелы
+      kkm_center="#kkm_center#" # тэг сдвига к центру
+      space_n=math.floor((w-(len(s)-len(kkm_center)))/2) # кол-во пробелов
+      s=str.replace(s, kkm_center, " "*space_n) # заменяем тэг сдвига на пробелы
+
+      return s
+
     try:
       if FRport == 'AUTO':
+        print("Включен режим автоматического поиска оборудования. Это может занять некоторое время.")
         devices = pyshtrih.discovery(discovery_callback)
       else:
         devices = pyshtrih.discovery(discovery_callback, FRport, FRspeed)
@@ -120,6 +140,7 @@ class GP(BaseHTTPRequestHandler):
 
         elif d[0]=='p': #p;ТЕКСТ; выводит текст
           try:
+            d[1]=line_format(d[1], LineWidth)
             device.print_string(d[1])
             result += d[0]+";0;Успешно;;\n"
           except Exception as e:
@@ -128,7 +149,12 @@ class GP(BaseHTTPRequestHandler):
         elif d[0]=='pm': #pm;ТЕКСТ; выводит текст c новыми линиями
           try:
             for line in d[1].split("#kkm_br#"):
-              device.print_string(line)
+              if line[0:len('#kkm_bold#')]=='#kkm_bold#':
+                line=line_format(line, LineWidthBold)
+                device.print_font(line, 2)
+              else:
+                line=line_format(line, LineWidth)
+                device.print_string(line)
             result += d[0]+";0;Успешно;;\n"
           except Exception as e:
             result += d[0]+";3;"+format(e)+";;\n"
@@ -169,10 +195,10 @@ class GP(BaseHTTPRequestHandler):
 
             #пробуем отменить предыдущий чек перед открытием следующего
             #чтобы уменьшить количество проблем у кассиров
-            try:
-              device.cancel_check()
-            except Exception as e:
-              pass
+            #try:
+            #  device.cancel_check()
+            #except Exception as e:
+            #  pass
 
             #открываем документ
             device.open_check(check_type)
