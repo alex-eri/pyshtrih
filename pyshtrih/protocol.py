@@ -2,7 +2,6 @@
 
 
 import serial
-import unilog
 
 from . import misc, excepts
 from .compat import unicode, xrange, str_compat
@@ -310,7 +309,7 @@ class Response(object):
         return u'0x{:02X} ({}) - {}'.format(
             self.cmd,
             self.cmd_name,
-            unilog.as_unicode(self.params)
+            self.params
         )
 
     __repr__ = __str__
