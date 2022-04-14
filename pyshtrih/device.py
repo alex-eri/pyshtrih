@@ -17,7 +17,7 @@ class Device(compat.with_metaclass(commands.SupportedCommands)):
     TAPES = misc.T_TAPES(False, False, False)
     FS = False
 
-    def __init__(self, port='/dev/ttyS0', baudrate=9600, timeout=None, password=None, admin_password=None):
+    def __init__(self, port='/dev/ttyS0', baudrate=9600, timeout=SERIAL_TIMEOUT, password=DEFAULT_CASHIER_PASSWORD, admin_password=DEFAULT_ADMIN_PASSWORD):
         """
         :type port: str
         :param port: порт взаимодействия с устройством
@@ -34,12 +34,12 @@ class Device(compat.with_metaclass(commands.SupportedCommands)):
         self.protocol = protocol.Protocol(
             port,
             baudrate,
-            timeout or self.SERIAL_TIMEOUT,
+            timeout,
             fs=self.FS
         )
 
-        self.password = password or self.DEFAULT_CASHIER_PASSWORD
-        self.admin_password = admin_password or self.DEFAULT_ADMIN_PASSWORD
+        self.password = password
+        self.admin_password = admin_password
 
         self.dev_info = None
 
