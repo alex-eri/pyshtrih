@@ -13,11 +13,13 @@ class FD(object):
         # телефон или электронный адрес покупателя
         1008: (unicode, False, 64),
         # имя кассира для передачи в офд и печати на чеке
-        1021: (unicode, False, 64)
+        1021: (unicode, False, 64),
+        1212: (int, False, 1)
     }
 
     CAST = {
-        unicode: lambda x: x.encode('cp866')
+        unicode: lambda x: x.encode('cp866'),
+        int: lambda x: x.to_bytes(1,'big')
     }
     LEN = {
         bytes: (len, lambda value, len_: value.ljust(len_))

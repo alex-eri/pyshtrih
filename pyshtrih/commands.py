@@ -493,6 +493,33 @@ def return_sale(self, item, department_num=0, tax1=0, tax2=0, tax3=0, tax4=0):
 return_sale.cmd = 0x82
 
 
+def close_check_ex(self, payments, discount_allowance=0, tax1=0, tax2=0, tax3=0, tax4=0, text=None):
+    """
+    payments - [0] - cash, [1:15] - payment_type[x]
+    """
+
+    payments += [0]*16
+    payments = payments[:16]
+    payments_data = [
+         misc.CAST_SIZE['11111'](*misc.int_to_bytes(p, 5)) for p in payments
+    ]
+
+    try:
+        return self.protocol.command(
+            0x85,
+            self.password,
+            * payments_data,
+            # TODO: проверить скидку/надбавку
+            misc.CAST_SIZE['s2'](discount_allowance),
+            misc.CAST_SIZE['1111'](tax1, tax2, tax3, tax4),
+            misc.prepare_string(text, self.DEFAULT_MAX_LENGTH)
+        )
+    except excepts.ProtocolError as exc:
+        raise excepts.CloseCheckError(exc)
+
+close_check_ex.cmd = 0x8E
+
+
 def close_check(self,
                 cash=0,
                 payment_type2=0,
@@ -585,6 +612,7 @@ repeat.cmd = 0x8C
 def open_check(self, check_type):
     """
     Открыть чек.
+    #0 - продажа, 1 - покупка, 2 - возврат продажи, 3 - возврат покупки
     """
 
     self.wait_printing()
@@ -756,6 +784,26 @@ def send_tlv_struct(self, tlv_struct):
 send_tlv_struct.cmd = 0xFF0C
 
 
+def send_tlv_struct_line(self, tlv_struct):
+    """
+    Передать произвольную TLV структуру.
+    """
+
+    if len(tlv_struct) > misc.TLV_LEN_MAX:
+        raise ValueError(
+            u'Максимальный размер tlv структуры - {} байт'.format(misc.TLV_LEN_MAX)
+        )
+
+    return self.protocol.command(
+        0xFF4D,
+        self.admin_password,
+        tlv_struct
+    )
+send_tlv_struct_line.cmd = 0xFF4D
+
+
+
+
 def fs_begin_correction_check(self):
     """
     Начать формирование чека коррекции.
@@ -893,7 +941,7 @@ def operation_v2(self, oper_type, item, department_num=0, item_sum=0xffffffffff,
 
     return self.protocol.command(
         0xFF46,
-        self.admin_password,
+        self.password,
         misc.CAST_SIZE['1'](oper_type),
         misc.CAST_SIZE['111111'](*misc.int_to_bytes(quantity, 6)), #???
         misc.CAST_SIZE['11111'](*misc.int_to_bytes(price, 5)),
