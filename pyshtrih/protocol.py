@@ -2,6 +2,7 @@
 
 
 import serial
+import logging
 
 from . import misc, excepts
 from .compat import unicode, xrange, str_compat
@@ -147,7 +148,7 @@ class Protocol(object):
         :rtype: dict
         :return: набор параметров в виде словаря
         """
-
+        logging.debug('received payload: %s', payload)
         payload = misc.bytearray_cast(payload)
 
         # предполагаем, что команда однобайтная
@@ -214,6 +215,7 @@ class Protocol(object):
 
             for _ in xrange(self.MAX_ATTEMPTS):
                 try:
+                    logging.debug('sending: %s', command)
                     self.serial.write(command)
                     byte = self.serial.read()
                     if byte == ACK:
