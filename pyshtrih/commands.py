@@ -506,7 +506,7 @@ def close_check_ex(self, payments, discount_allowance=0, tax1=0, tax2=0, tax3=0,
 
     try:
         return self.protocol.command(
-            0x85,
+            0x8E,
             self.password,
             * payments_data,
             # TODO: проверить скидку/надбавку
