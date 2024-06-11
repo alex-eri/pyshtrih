@@ -838,6 +838,49 @@ def fs_close_shift(self):
 fs_close_shift.cmd = 0xFF43
 
 
+def operation_v2(self, oper_type, item, department_num=0, item_sum=0xffffffffff, tax_rate=0, tax_sum=0xFFFFFFFFFF, method=1, subject=1):
+    """
+    oper_type - тип операции
+        1 – Приход,
+        2 – Возврат прихода,
+        3 – Расход,
+        4 – Возврат расхода
+    tax_rate - тег tlv 1199 - ставка налога
+    tax_summ - сумма налогов
+    subject - тег tlv 1212: наименование предмета расчета
+        1 - товар
+        2 - акциз товар
+        3 - работа
+        4 - услуга
+    method - тег tlv 1214: признак способа расчета
+        1 - предоплата 100%
+        2 - предоплата
+        3 - аванс
+        4 - полный расчёт
+        5 - частичный расчет и кредит
+        6 - передача в кредит
+        7 - оплата кредита
+    """
+    text, quantity, price = item
+
+    return self.protocol.command(
+        0xFF46,
+        self.password,
+        misc.CAST_SIZE['1'](oper_type),
+        misc.CAST_SIZE['111111'](*misc.int_to_bytes(quantity, 6)), #???
+        misc.CAST_SIZE['11111'](*misc.int_to_bytes(price, 5)),
+        misc.CAST_SIZE['11111'](*misc.int_to_bytes(item_sum, 5)),
+        misc.CAST_SIZE['11111'](*misc.int_to_bytes(tax_sum, 5)),
+        misc.CAST_SIZE['1'](tax_rate),
+        misc.CAST_SIZE['1'](department_num),
+        misc.CAST_SIZE['1'](method),
+        misc.CAST_SIZE['1'](subject),
+        misc.prepare_string(text, self.DEFAULT_MAX_LENGTH)
+    )
+
+operation_v2.cmd = 0xFF46
+
+
 def wait_printing(self):
     """
     Метод ожидания окончания печати документа.
